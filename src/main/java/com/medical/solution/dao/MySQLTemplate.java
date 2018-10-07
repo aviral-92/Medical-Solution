@@ -2,12 +2,19 @@ package com.medical.solution.dao;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
@@ -30,8 +37,10 @@ public class MySQLTemplate {
 	@Autowired
 	public MySQLTemplate(DataSource dataSource) {
 		try {
+			LOG.info(dataSource);
 			this.datasource = dataSource;
 			this.connection = datasource.getConnection();
+			LOG.info(connection);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -39,6 +48,7 @@ public class MySQLTemplate {
 
 	public <T extends Persistable> boolean createTableIfNotExist(T t, String tableName, Class<T> entityClass) {
 
+		LOG.info("Entered into createTableIfNotExist method");
 		StringBuffer sb = new StringBuffer("CREATE TABLE IF NOT EXISTS " + tableName + " (");
 		boolean insertSuccess = false;
 		Statement stmt = null;
@@ -78,15 +88,18 @@ public class MySQLTemplate {
 				e.printStackTrace();
 			}
 		}
+		LOG.info("exit from createTableIfNotExist method");
 		return insertSuccess;
 	}
 
 	public <T extends Persistable> boolean insert(T t, String tableName, Class<T> entityClass) {
 
+		LOG.info("Entered into insert method");
 		boolean isInsert = false;
 		StringBuilder sb = new StringBuilder("INSERT INTO " + tableName + " (");
 		List<Field> fields = getFields(entityClass);
 		List<Object> listOfValues = new ArrayList<>();
+		PreparedStatement ps = null;
 		try {
 			for (Field field : fields) {
 				Object value = field.get(t);
@@ -103,7 +116,7 @@ public class MySQLTemplate {
 			sb = sb.deleteCharAt(sb.length() - 1);
 			sb.append(");");
 			LOG.info(sb);
-			PreparedStatement ps = connection.prepareStatement(sb.toString());
+			ps = connection.prepareStatement(sb.toString());
 			int j = 1;
 			for (int i = 0; i < listOfValues.size(); i++) {
 				ps.setObject(j, listOfValues.get(i));
@@ -119,16 +132,101 @@ public class MySQLTemplate {
 			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				ps.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
+		LOG.info("exit from insert method");
 		return isInsert;
+	}
+
+	public <T extends Persistable> List<T> getAllRecords(String table, Class<T> entityClass) {
+
+		LOG.info("getAllRecords method called....");
+		String query = "SELECT * FROM " + table + ";";
+		LOG.info(query);
+		T t = null;
+		List<T> queryResults = new ArrayList<>();
+		Map<String, Object> resultMap = new HashMap<>();
+		Map<String, Field> fieldsMap = getFieldsMap(entityClass);
+		try {
+			t = (T) entityClass.newInstance();
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				for (String keySet : fieldsMap.keySet()) {
+					if (rs.getObject(keySet) != null) {
+						Field field = fieldsMap.get(keySet);
+						Object convertedValue = null;
+						resultMap.put(keySet, rs.getObject(keySet));
+						convertedValue = getValueForType(String.valueOf(rs.getObject(keySet)),
+								field.getType().getSimpleName());
+						field.set(t, convertedValue);
+					}
+				}
+				queryResults.add(t);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		LOG.info("exit from getAllRecords method....");
+		return queryResults;
 	}
 
 	private <T extends Persistable> List<Field> getFields(Class<T> entityClass) {
 
+		LOG.info("-----getFields method called");
 		Field[] allFields = entityClass.getDeclaredFields();
 		List<Field> fields = Arrays.stream(allFields).collect(Collectors.toList());
 		fields.forEach(f -> f.setAccessible(true));
 		return fields;
 	}
 
+	private <T extends Persistable> Map<String, Field> getFieldsMap(Class<T> entityClass) {
+
+		Map<String, Field> fieldsMap = new HashMap<String, Field>();
+		Field[] fields = entityClass.getDeclaredFields();
+		for (Field field : fields) {
+			field.setAccessible(true);
+			fieldsMap.put(field.getName(), field);
+		}
+		return fieldsMap;
+	}
+
+	private Object getValueForType(String valueToBeSet, String type) throws ParseException {
+
+		switch (type) {
+
+		case "String":
+			return valueToBeSet;
+
+		case "short":
+		case "Short":
+			return Short.valueOf(valueToBeSet);
+
+		case "long":
+		case "Long":
+			return Long.valueOf(valueToBeSet);
+
+		case "int":
+		case "Integer":
+			return Integer.valueOf(valueToBeSet);
+
+		case "Date":
+			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+			return formatter.parse(valueToBeSet);
+
+		default:
+			throw new IllegalArgumentException("Unsupported Field type: " + type + " value: [ " + valueToBeSet + " ]");
+		}
+	}
 }

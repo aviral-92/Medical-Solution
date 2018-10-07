@@ -2,6 +2,8 @@ package com.medical.solution.repository;
 
 import static com.medical.solution.constant.Constants.DOCTOR_MYSQL_TABLE_NAME;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -26,5 +28,9 @@ public class DoctorRepository {
 			return "Success";
 		}
 		return "Failed";
+	}
+	
+	public List<Doctor> getAllDoctors(){
+		return MySQLTemplate.getAllRecords(DOCTOR_MYSQL_TABLE_NAME, Doctor.class);
 	}
 }

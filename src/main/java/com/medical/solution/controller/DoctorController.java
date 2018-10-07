@@ -1,6 +1,7 @@
 package com.medical.solution.controller;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,5 +52,10 @@ public class DoctorController {
 		doctor.setSelfDescription("SelfDesc");
 		doctor.setVerified(1);
 		return doctorService.addDoctor(doctor);
+	}
+
+	@RequestMapping("/getAllDoctors")
+	public List<Doctor> getAllDoctors() {
+		return doctorService.getAllDoctors();
 	}
 }
