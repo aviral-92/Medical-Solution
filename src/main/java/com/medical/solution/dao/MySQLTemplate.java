@@ -148,21 +148,41 @@ public class MySQLTemplate {
 		LOG.info("getAllRecords method called....");
 		String query = "SELECT * FROM " + table + ";";
 		LOG.info(query);
-		T t = null;
 		List<T> queryResults = new ArrayList<>();
 		Map<String, Object> resultMap = new HashMap<>();
 		Map<String, Field> fieldsMap = getFieldsMap(entityClass);
+		ResultSet rs = null;
 		try {
-			t = (T) entityClass.newInstance();
 			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			rs = stmt.executeQuery(query);
+			getAllRecords(rs, resultMap, fieldsMap, queryResults, entityClass);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		LOG.info("exit from getAllRecords method....");
+		return queryResults;
+	}
+
+	private <T extends Persistable> void getAllRecords(ResultSet rs, Map<String, Object> resultMap,
+			Map<String, Field> fieldsMap, List<T> queryResults, Class<T> entityClass) {
+
+		LOG.info("Entered into private getAllRecords method.....");
+		try {
 			while (rs.next()) {
+				T t = (T) entityClass.newInstance();
 				for (String keySet : fieldsMap.keySet()) {
-					if (rs.getObject(keySet) != null) {
+					Object resultSetValue = rs.getObject(keySet);
+					if (resultSetValue != null) {
 						Field field = fieldsMap.get(keySet);
 						Object convertedValue = null;
-						resultMap.put(keySet, rs.getObject(keySet));
-						convertedValue = getValueForType(String.valueOf(rs.getObject(keySet)),
+						resultMap.put(keySet, resultSetValue);
+						convertedValue = getValueForType(String.valueOf(resultSetValue),
 								field.getType().getSimpleName());
 						field.set(t, convertedValue);
 					}
@@ -171,15 +191,14 @@ public class MySQLTemplate {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {
 			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
 		}
-		LOG.info("exit from getAllRecords method....");
-		return queryResults;
+		LOG.info("exit from private getAllRecords method.....");
 	}
 
 	private <T extends Persistable> List<Field> getFields(Class<T> entityClass) {
