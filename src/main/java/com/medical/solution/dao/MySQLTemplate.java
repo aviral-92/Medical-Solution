@@ -1,8 +1,9 @@
 package com.medical.solution.dao;
 
+import static com.medical.solution.constant.Constants.getPrimaryKeyMap;
+
 import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -149,13 +150,12 @@ public class MySQLTemplate {
 		String query = "SELECT * FROM " + table + ";";
 		LOG.info(query);
 		List<T> queryResults = new ArrayList<>();
-		Map<String, Object> resultMap = new HashMap<>();
 		Map<String, Field> fieldsMap = getFieldsMap(entityClass);
 		ResultSet rs = null;
 		try {
 			Statement stmt = connection.createStatement();
 			rs = stmt.executeQuery(query);
-			getAllRecords(rs, resultMap, fieldsMap, queryResults, entityClass);
+			getAllRecords(rs, fieldsMap, queryResults, entityClass);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -169,33 +169,77 @@ public class MySQLTemplate {
 		return queryResults;
 	}
 
-	private <T extends Persistable> void getAllRecords(ResultSet rs, Map<String, Object> resultMap,
-			Map<String, Field> fieldsMap, List<T> queryResults, Class<T> entityClass) {
+	public <T extends Persistable> T getRecordOnBasisOfId(String primaryKeyValue, String table, Class<T> entityClass) {
+
+		LOG.info("getRecord method called....");
+		String primaryKey = getPrimaryKeyMap.get(entityClass);
+		StringBuilder sb = new StringBuilder("SELECT * FROM " + table + " where " + primaryKey + " = ? ;");
+		LOG.info(sb);
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Map<String, Field> fieldsMap = getFieldsMap(entityClass);
+		try {
+			ps = connection.prepareStatement(sb.toString());
+			ps.setObject(1, primaryKeyValue);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				return getRecord(entityClass, fieldsMap, rs);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				ps.close();
+				rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		T t = null;
+		try {
+			t = entityClass.newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return t;
+	}
+
+	private <T extends Persistable> T getRecord(Class<T> entityClass, Map<String, Field> fieldsMap, ResultSet rs) {
+
+		T t = null;
+		try {
+			t = (T) entityClass.newInstance();
+			for (String keySet : fieldsMap.keySet()) {
+				Object resultSetValue = rs.getObject(keySet);
+				if (resultSetValue != null) {
+					Field field = fieldsMap.get(keySet);
+					Object convertedValue = null;
+					convertedValue = getValueForType(String.valueOf(resultSetValue), field.getType().getSimpleName());
+					field.set(t, convertedValue);
+				}
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return t;
+	}
+
+	private <T extends Persistable> void getAllRecords(ResultSet rs, Map<String, Field> fieldsMap, List<T> queryResults,
+			Class<T> entityClass) {
 
 		LOG.info("Entered into private getAllRecords method.....");
 		try {
 			while (rs.next()) {
-				T t = (T) entityClass.newInstance();
-				for (String keySet : fieldsMap.keySet()) {
-					Object resultSetValue = rs.getObject(keySet);
-					if (resultSetValue != null) {
-						Field field = fieldsMap.get(keySet);
-						Object convertedValue = null;
-						resultMap.put(keySet, resultSetValue);
-						convertedValue = getValueForType(String.valueOf(resultSetValue),
-								field.getType().getSimpleName());
-						field.set(t, convertedValue);
-					}
-				}
+				T t = getRecord(entityClass, fieldsMap, rs);
 				queryResults.add(t);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
 			e.printStackTrace();
 		}
 		LOG.info("exit from private getAllRecords method.....");
