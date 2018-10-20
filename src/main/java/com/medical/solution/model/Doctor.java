@@ -28,7 +28,7 @@ public class Doctor implements Persistable {
 	private String profilePicPath;
 	private Date createdDate;
 	private Date updatedDate;
-	// private DoctorAddress doctorAddress;
+	private String doctorAddress;
 	private String description;
 	private String password;
 
@@ -224,6 +224,26 @@ public class Doctor implements Persistable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getDoctorAddress() {
+		return doctorAddress;
+	}
+
+	public void setDoctorAddress(String doctorAddress) {
+		this.doctorAddress = doctorAddress;
+	}
+
+	@Override
+	public String toString() {
+		return "Doctor [dId=" + dId + ", name=" + name + ", mobile=" + mobile + ", aadhaar=" + aadhaar + ", clinic="
+				+ clinic + ", homeAddress=" + homeAddress + ", highestDegree=" + highestDegree + ", expertise="
+				+ expertise + ", selfDescription=" + selfDescription + ", isGoverment=" + isGoverment + ", fee=" + fee
+				+ ", freeDay=" + freeDay + ", email=" + email + ", gender=" + gender + ", state=" + state
+				+ ", dateOfBrith=" + dateOfBrith + ", timing=" + timing + ", tandCAccepted=" + tandCAccepted
+				+ ", verified=" + verified + ", profilePicPath=" + profilePicPath + ", createdDate=" + createdDate
+				+ ", updatedDate=" + updatedDate + ", doctorAddress=" + doctorAddress + ", description=" + description
+				+ ", password=" + password + "]";
 	}
 
 }

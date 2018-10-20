@@ -35,7 +35,7 @@ public class Configurations {
 	@Bean
 	public ExecutorService executorService(){
 		
-		ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 20, 10000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(10));
+		ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 20, 10000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(10));
 		threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
 		return threadPoolExecutor;
 	}

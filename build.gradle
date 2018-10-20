@@ -42,8 +42,6 @@ dependencies {
 		compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 		// https://mvnrepository.com/artifact/org.springframework/spring-beans
 		//compile group: 'org.springframework', name: 'spring-beans', version: '3.0.2.RELEASE'
-		compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.1'
-
 		
 		// https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto
 		//compile group: 'org.springframework.security', name: 'spring-security-crypto', version: '3.1.0.RELEASE'
