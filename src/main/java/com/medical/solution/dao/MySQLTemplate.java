@@ -1,6 +1,6 @@
 package com.medical.solution.dao;
 
-import static com.medical.solution.constant.Constants.getPrimaryKeyMap;
+import static com.medical.solution.constant.Constants.GET_PRIMARY_KEY_MAP;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -57,10 +57,10 @@ public class MySQLTemplate {
 			List<Field> fields = getFields(entityClass);
 
 			for (Field field : fields) {
-				Object value = field.get(t);
-				LOG.info(field.getName());
-				LOG.info("\t" + field.getType().getName());
-				LOG.info("\t" + value + "\n");
+				// Object value = field.get(t);
+				// LOG.info(field.getName());
+				// LOG.info("\t" + field.getType().getName());
+				// LOG.info("\t" + value + "\n");
 				if (field.getType().getName().contains("String")) {
 					sb.append(field.getName() + " " + "VARCHAR(45), ");
 				} else if (field.getType().getName().contains("Integer")) {
@@ -79,7 +79,7 @@ public class MySQLTemplate {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			insertSuccess = false;
-		} catch (IllegalArgumentException | IllegalAccessException e) {
+		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 			insertSuccess = false;
 		} finally {
@@ -172,7 +172,7 @@ public class MySQLTemplate {
 	public <T extends Persistable> T getRecordOnBasisOfId(String primaryKeyValue, String table, Class<T> entityClass) {
 
 		LOG.info("getRecord method called....");
-		String primaryKey = getPrimaryKeyMap.get(entityClass);
+		String primaryKey = GET_PRIMARY_KEY_MAP.get(entityClass);
 		StringBuilder sb = new StringBuilder("SELECT * FROM " + table + " where " + primaryKey + " = ? ;");
 		LOG.info(sb);
 		PreparedStatement ps = null;

@@ -1,5 +1,10 @@
 package com.medical.solution.config;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,5 +30,13 @@ public class Configurations {
 		dataSource.setUsername(username);
 		dataSource.setPassword(password);
 		return dataSource;
+	}
+	
+	@Bean
+	public ExecutorService executorService(){
+		
+		ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 20, 10000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(10));
+		threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+		return threadPoolExecutor;
 	}
 }

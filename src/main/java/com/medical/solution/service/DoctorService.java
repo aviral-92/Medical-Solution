@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.medical.solution.model.Doctor;
-import com.medical.solution.repository.DoctorRepository;
+import com.medical.solution.repository.MedicalRepository;
 
 @Service
 public class DoctorService {
@@ -15,23 +15,28 @@ public class DoctorService {
 	private static final Logger LOG = Logger.getLogger(DoctorService.class);
 
 	@Autowired
-	private DoctorRepository doctorRepository;
+	private MedicalRepository medicalRepository;
 
 	public boolean createtDoctor(Doctor doctor) {
 
-		return doctorRepository.createDoctorTable(doctor);
+		return medicalRepository.createMedical(Doctor.class);
 	}
 
 	public String addDoctor(Doctor doctor) {
-		return doctorRepository.addDoctor(doctor);
+		boolean isAdded = medicalRepository.addMedical(doctor, Doctor.class);
+		if (isAdded) {
+			return "Success";
+		} else {
+			return "failed";
+		}
 	}
 
 	public List<Doctor> getAllDoctors() {
-		return doctorRepository.getAllDoctors();
+		return medicalRepository.getAllMedicals(Doctor.class);
 	}
 
 	public Doctor getDoctor(String doctorId) {
 		LOG.info("-------------getDoctor method called---------------");
-		return doctorRepository.getDoctor(doctorId);
+		return medicalRepository.getMedical(doctorId, Doctor.class);
 	}
 }
