@@ -57,10 +57,6 @@ public class MySQLTemplate {
 			List<Field> fields = getFields(entityClass);
 
 			for (Field field : fields) {
-				// Object value = field.get(t);
-				// LOG.info(field.getName());
-				// LOG.info("\t" + field.getType().getName());
-				// LOG.info("\t" + value + "\n");
 				if (field.getType().getName().contains("String")) {
 					sb.append(field.getName() + " " + "VARCHAR(45), ");
 				} else if (field.getType().getName().contains("Integer")) {

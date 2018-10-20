@@ -27,6 +27,7 @@ public class MedicalRepository {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T extends Persistable> boolean createMedical(Class<T> clazz) {
 
 		LOG.info("createMedical method called");
