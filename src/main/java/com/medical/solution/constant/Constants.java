@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.medical.solution.model.Doctor;
 import com.medical.solution.model.Patient;
-import com.medical.solution.model.common.Persistable;
 
 public class Constants {
 
