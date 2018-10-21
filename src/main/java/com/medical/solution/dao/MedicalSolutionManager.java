@@ -1,9 +1,14 @@
 package com.medical.solution.dao;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.medical.solution.dao.repository.MedicalRepository;
 import com.medical.solution.model.Appointment;
 import com.medical.solution.model.Calendar;
 import com.medical.solution.model.Cases;
@@ -15,7 +20,7 @@ import com.medical.solution.model.Message;
 import com.medical.solution.model.Notification;
 import com.medical.solution.model.Patient;
 import com.medical.solution.model.TodoList;
-import com.medical.solution.repository.MedicalRepository;
+import com.medical.solution.model.common.Persistable;
 
 @Component
 public class MedicalSolutionManager {
@@ -34,9 +39,26 @@ public class MedicalSolutionManager {
 		boolean isCreated = medicalRepository.createMedical(Doctor.class);
 		if (isCreated) {
 			LOG.info("Doctor table created.");
+			List<Doctor> doctors = new ArrayList<>();
+			for (int i = 0; i < 5; i++) {
+				doctors.add(getDoctor(i));
+			}
+			if (medicalRepository.addAllMedical(doctors, Doctor.class)) {
+				LOG.info("::::::Doctors inserted::::::");
+				printAll(Doctor.class);
+			}
 		} else {
 			LOG.info("Doctor table might already exist.");
 		}
+	}
+
+	private <T extends Persistable> void printAll(Class<T> clazz) {
+
+		List<T> listT = medicalRepository.getAllMedicals(clazz);
+		for (T t : listT) {
+			LOG.info(t);
+		}
+		LOG.info(":::::::::ENDING FOR :::::::::::::" + clazz.getName());
 	}
 
 	public void createPatientTable() {
@@ -45,6 +67,14 @@ public class MedicalSolutionManager {
 		boolean isCreated = medicalRepository.createMedical(Patient.class);
 		if (isCreated) {
 			LOG.info("Patient table created.");
+			List<Patient> patients = new ArrayList<>();
+			for (int i = 0; i < 5; i++) {
+				patients.add(getPatient(i));
+			}
+			if (medicalRepository.addAllMedical(patients, Patient.class)) {
+				LOG.info("::::::Patients inserted::::::");
+				printAll(Patient.class);
+			}
 		} else {
 			LOG.info("Patient table might already exist.");
 		}
@@ -59,6 +89,7 @@ public class MedicalSolutionManager {
 		} else {
 			LOG.info("Appointment table might already exist.");
 		}
+
 	}
 
 	public void createCasesTable() {
@@ -147,5 +178,47 @@ public class MedicalSolutionManager {
 		} else {
 			LOG.info("TodoList table might already exist.");
 		}
+	}
+
+	private Doctor getDoctor(int i) {
+
+		Doctor doctor = new Doctor();
+		doctor.setAadhaar("Adhaar");
+		doctor.setClinic("Clinic");
+		doctor.setCreatedDate(new Date());
+		doctor.setDescription("Desc");
+		doctor.setEmail("abc@mail.com");
+		doctor.setExpertise("Heart");
+		doctor.setFee(150);
+		doctor.setFreeDay(1);
+		doctor.setGender("Male");
+		doctor.setHighestDegree("MBBS");
+		doctor.setHomeAddress("Delhi");
+		doctor.setId(i + "");
+		doctor.setIsGoverment(1);
+		doctor.setMobile("8524585450");
+		doctor.setName("Aviral");
+		doctor.setPassword("Hello");
+		doctor.setProfilePicPath("path");
+		doctor.setSelfDescription("SelfDesc");
+		doctor.setVerified(1);
+		return doctor;
+	}
+
+	private Patient getPatient(int i) {
+
+		Patient patient = new Patient();
+		patient.setAadhaar("Adhaar");
+		patient.setAllergies("Allergies");
+		patient.setCreatedDate(new Date());
+		patient.setEmail("demo");
+		patient.setId(i + "");
+		patient.setMobile("8587412569");
+		patient.setGender("Male");
+		patient.setPassword("pswd");
+		patient.setName("Name");
+		patient.setPatientAddress("Address");
+		patient.setTandCAccepted(1);
+		return patient;
 	}
 }

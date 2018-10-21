@@ -6,8 +6,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.medical.solution.dao.repository.MedicalRepository;
 import com.medical.solution.model.Doctor;
-import com.medical.solution.repository.MedicalRepository;
 
 @Service
 public class DoctorService {

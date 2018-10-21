@@ -89,6 +89,17 @@ public class MySQLTemplate {
 		return insertSuccess;
 	}
 
+	public <T extends Persistable> boolean insertAll(List<T> listT, String tableName, Class<T> clazz) {
+
+		boolean isInserted = false;
+		LOG.info("::: Entered into insertAll method :::");
+		for (T t : listT) {
+			isInserted = insert(t, tableName, clazz);
+		}
+		LOG.info("::: Exiting from insertAll method :::");
+		return isInserted;
+	}
+
 	public <T extends Persistable> boolean insert(T t, String tableName, Class<T> entityClass) {
 
 		LOG.info("Entered into insert method");
